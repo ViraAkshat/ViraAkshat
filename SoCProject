@@ -1,7 +1,10 @@
 •Dual Booting:
-	So, there was a video about how to dual boot Ubuntu with Windows 10. However, it did not work for me, reason being my laptop has Optane memory and dual booting such a laptop needs a different process. The following video explains the process very well:	https://youtu.be/2uXgbF3P2F8
+	So, there was a video about how to dual boot Ubuntu with Windows 10. 
+	However, it did not work for me, reason being my laptop has Optane memory and dual booting such a laptop needs a different process. 
+	The following video explains the process very well:	https://youtu.be/2uXgbF3P2F8
 
-Also, this won't solve the problem fully. After each kernel update you have to follow the following procedure(I got this in the comment section of above video)
+Also, this won't solve the problem fully. After each kernel update you have to follow the following procedure
+(I got this in the comment section of above video):
 1. Disable optane from windows
 2. Switch to AHCI
 3. Go to ubuntu via chroot (via Live USB) or boot from an older kernel
