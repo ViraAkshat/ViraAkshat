@@ -1,0 +1,52 @@
+•Dual Booting:
+	So, there was a video about how to dual boot Ubuntu with Windows 10. However, it did not work for me, reason being my laptop has Optane memory and dual booting such a laptop needs a different process. The following video explains the process very well:	https://youtu.be/2uXgbF3P2F8
+
+Also, this won't solve the problem fully. After each kernel update you have to follow the following procedure(I got this in the comment section of above video)
+1. Disable optane from windows
+2. Switch to AHCI
+3. Go to ubuntu via chroot (via Live USB) or boot from an older kernel
+4. Run "sudo update-initramfs && update-grub"
+   (If chroot, it won't add windows to grub. Reboot to ubuntu and update-grub)
+5. Switch back to RST Optane
+6. Enable Optane on Windows
+
+
+//End of dual booting section
+
+•Keyboard Shortcuts:
+Ubuntu offers a lot of keyboard shortcuts to make life easier. Here are some of them:
+1. Super Key(the windows key):
+	You want to open an application? 
+		Press the super key and search for the application. 
+		If the application is not installed, it will even suggest applications from software center.
+
+	You want to see the running applications?
+		Press super key and it will show you all the running GUI applications and workspaces on the RHS.
+
+2. Ctrl + Alt +  T:
+	Opens the terminal
+
+3. Super + L :
+	Locks the screen
+
+4. Super + D :
+	Minimizes all the windows & if pressed again maximizes them as they were previously
+
+5. Super + A :
+	Opens the application menu
+
+6. Super + Tab or Alt + Tab :
+	Switches between the running windows/applications
+
+7. Super + Arrow keys :
+	Maximize, move the window to right/left edge
+
+8. Super + M :
+	Toggle the notification tray
+
+9. Ctrl + Alt + Arrow :
+	Switch between Workspaces
+
+//End of Keyboard Shortcuts
+
+
