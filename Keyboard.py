@@ -2,6 +2,15 @@ import numpy as np
 import cv2
 from datetime import datetime as dt
 
+keys = np.array([['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'],
+                 ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+                 ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+                 ['A', 'S ', 'D', 'F', 'G', 'H', 'J', 'K', 'L', '\n'],
+                 ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ' ', ' ', 'SHIFT'],
+                 [':', ';', '"', '\'', ',', '.', '<', '>', '/', '?']])
+text = []
+t1, t2, key, key_pressed, pressed_once = 0, 0, (0, 0), False, False
+
 
 # To bring keyboard in perspective
 def perspective(image):
@@ -46,7 +55,7 @@ def coordinates(h, s, v, uh, img):
 
 # To find which key is pressed
 def is_key_pressed(x, y):
-    global t1, t2, key, key_pressed
+    global t1, t2, key, key_pressed, pressed_once
     xrange = np.arange(0, 1281, step=128)
     yrange = np.arange(0, 721, step=120)
     xKey, yKey = 0, 0
@@ -58,10 +67,10 @@ def is_key_pressed(x, y):
         if yrange[j] < y < yrange[j + 1]:
             yKey = j
 
-    if key == (xKey, yKey):
+    if key == (yKey, xKey):
         enter_new_cell = False
     else:
-        key = (xKey, yKey)
+        key = (yKey, xKey)
         enter_new_cell = True
         pressed_once = False
 
@@ -70,21 +79,26 @@ def is_key_pressed(x, y):
     else:
         t2 = dt.now()
 
-    if (t2 - t1).seconds > 1 and pressed_once == False:
+    if (t2 - t1).seconds > 1 and not pressed_once:
         key_pressed = True
         pressed_once = True
 
-    return key
+    # return key, key_pressed
 
 
 # Testing
-t1, t2, key, key_pressed = 0, 0, (0, 0), False
 frame = cv2.imread('IMG.jpg')
 frame = cv2.resize(frame, (1280, 720))
 cv2.imshow('one', frame)
 
 res = perspective(frame)
 cv2.imshow('result', res)
+
+x, y = coordinates(15, 255, 255, 30, res)
+is_key_pressed(x, y)
+
+if pressed_once:
+    text.append(key)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
