@@ -1,21 +1,22 @@
 import numpy as np
 import cv2
-from datetime import datetime as dt
+# from datetime import datetime as dt
+import time
 
 keys = np.array([['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'],
                  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
                  ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
                  ['A', 'S ', 'D', 'F', 'G', 'H', 'J', 'K', 'L', '\n'],
-                 ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ' ', ' ', 'SHIFT'],
+                 ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ' ', ' ', 'CAPS'],
                  [':', ';', '"', '\'', ',', '.', '<', '>', '/', '?']])
 text = []
-t1, t2, key, key_pressed, pressed_once = 0, 0, (0, 0), False, False
+t1, t2, key, pressed_once = 0, 0, (0, 0), 0
 
-cap = cv2.VideoCapture('VKeyboard.mp4')
+cap = cv2.VideoCapture('vid2.mp4')
 
 
 # To bring keyboard in perspective
-def perspective(image):
+def keyboardPerspective(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     thg = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 71, 7)
     gauss = cv2.GaussianBlur(thg, (5, 5), 0)
@@ -32,9 +33,21 @@ def perspective(image):
     approx = cv2.approxPolyDP(maxContour, epsilon, True)
     pts = np.float32([approx[1][0], approx[0][0], approx[2][0], approx[3][0]])
     d = np.float32([[0, 0], [719, 0], [0, 1279], [719, 1279]])
-    print(approx)
     matrix = cv2.getPerspectiveTransform(pts, d)
-    print(matrix)
+    final = cv2.warpPerspective(image, matrix, (720, 1280))
+    final = np.rot90(final)
+
+    return final, approx
+
+
+def perspective(image, pos):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    thg = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 71, 7)
+    gauss = cv2.GaussianBlur(thg, (5, 5), 0)
+
+    pts = np.float32([pos[1][0], pos[0][0], pos[2][0], pos[3][0]])
+    d = np.float32([[0, 0], [719, 0], [0, 1279], [719, 1279]])
+    matrix = cv2.getPerspectiveTransform(pts, d)
     final = cv2.warpPerspective(image, matrix, (720, 1280))
     final = np.rot90(final)
 
@@ -49,15 +62,19 @@ def coordinates(img):
 
     color = cv2.inRange(img, low, high)
     M = cv2.moments(color)
-    x = int(M["m10"] / M["m00"])
-    y = int(M["m01"] / M["m00"])
+    if M["m00"] != 0:
+        x = int(M["m10"] / M["m00"])
+        y = int(M["m01"] / M["m00"])
+    else:
+        x, y = 0, 0
 
     return x, y
 
 
 # To find which key is pressed
 def is_key_pressed(x, y):
-    global t1, t2, key, key_pressed, pressed_once
+    global t1, t2, key, pressed_once
+    print(pressed_once)
     xrange = np.arange(0, 1281, step=128)
     yrange = np.arange(0, 721, step=120)
     xKey, yKey = 0, 0
@@ -74,33 +91,46 @@ def is_key_pressed(x, y):
     else:
         key = (yKey, xKey)
         enter_new_cell = True
-        pressed_once = False
+        pressed_once = 0
 
     if enter_new_cell:
-        t1 = dt.now()
+        t1 = time.monotonic()
     else:
-        t2 = dt.now()
+        t2 = time.monotonic()
 
-    if (t2 - t1).seconds > 1 and not pressed_once:
-        key_pressed = True
-        pressed_once = True
-
-    # return key, key_pressed
+    if (t2 - t1) > 1 and not pressed_once:
+        pressed_once += 1
 
 
 # Testing
-frame = cv2.imread('IMG.jpg')
-frame = cv2.resize(frame, (1280, 720))
-cv2.imshow('one', frame)
+_, keyboard = cap.read()
+keyboard = cv2.resize(keyboard, (1280, 720))
+keyboard = np.rot90(keyboard)
+keyboard = np.rot90(keyboard)
+keyboard, keyPos = keyboardPerspective(keyboard)
 
-res = perspective(frame)
-cv2.imshow('result', res)
+while cap.isOpened():
 
-x, y = coordinates(res)
-is_key_pressed(x, y)
+    ret, frame = cap.read()
+    frame = cv2.resize(frame, (1280, 720))
+    frame = np.rot90(frame)
+    frame = np.rot90(frame)
+    cv2.imshow('one', frame)
 
-if pressed_once:
-    text.append(key)
+    res = perspective(frame, keyPos)
+    cv2.imshow('result', res)
 
-cv2.waitKey(0)
+    cx, cy = coordinates(res)
+    is_key_pressed(cx, cy)
+
+    if pressed_once is 1 and cx != 0:
+        text.append(keys[key])
+        pressed_once += 1
+        print(text)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+# cv2.waitKey(0)
 cv2.destroyAllWindows()
