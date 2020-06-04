@@ -96,7 +96,7 @@ cv2.imshow('one', frame)
 res = perspective(frame)
 cv2.imshow('result', res)
 
-x, y = coordinates(15, 255, 255, 30, res)
+x, y = coordinates(res)
 is_key_pressed(x, y)
 
 if pressed_once:
