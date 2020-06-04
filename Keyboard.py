@@ -41,10 +41,6 @@ def keyboardPerspective(image):
 
 
 def perspective(image, pos):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    thg = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 71, 7)
-    gauss = cv2.GaussianBlur(thg, (5, 5), 0)
-
     pts = np.float32([pos[1][0], pos[0][0], pos[2][0], pos[3][0]])
     d = np.float32([[0, 0], [719, 0], [0, 1279], [719, 1279]])
     matrix = cv2.getPerspectiveTransform(pts, d)
@@ -74,7 +70,6 @@ def coordinates(img):
 # To find which key is pressed
 def is_key_pressed(x, y):
     global t1, t2, key, pressed_once
-    print(pressed_once)
     xrange = np.arange(0, 1281, step=128)
     yrange = np.arange(0, 721, step=120)
     xKey, yKey = 0, 0
@@ -112,6 +107,9 @@ keyboard, keyPos = keyboardPerspective(keyboard)
 while cap.isOpened():
 
     ret, frame = cap.read()
+    if ret is False:
+        break
+
     frame = cv2.resize(frame, (1280, 720))
     frame = np.rot90(frame)
     frame = np.rot90(frame)
