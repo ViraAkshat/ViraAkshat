@@ -11,6 +11,8 @@ keys = np.array([['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'],
 text = []
 t1, t2, key, key_pressed, pressed_once = 0, 0, (0, 0), False, False
 
+cap = cv2.VideoCapture('VKeyboard.mp4')
+
 
 # To bring keyboard in perspective
 def perspective(image):
@@ -40,12 +42,12 @@ def perspective(image):
 
 
 # To find coordinates of fingertip
-def coordinates(h, s, v, uh, img):
-    x, y = 0, 0
+def coordinates(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    lcolor = np.array([h, s, v])
-    hcolor = np.array([h, 255, 255])
-    color = cv2.inRange(img, lcolor, hcolor)
+    low = np.array([9, 160, 120])
+    high = np.array([12, 255, 250])
+
+    color = cv2.inRange(img, low, high)
     M = cv2.moments(color)
     x = int(M["m10"] / M["m00"])
     y = int(M["m01"] / M["m00"])
